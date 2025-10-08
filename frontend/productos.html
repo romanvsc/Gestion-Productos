@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Sistema de Gestión de Productos</h2>
+    
+    <div class="stats">
+        Total de productos: <span id="totalProductos">0</span> | 
+        Productos filtrados: <span id="productosFiltrados">0</span> | 
+        Valor total stock: $<span id="valorTotal">0</span>
+    </div>
+    
+    <div class="filtros">
+        <h3>Filtros y Búsqueda</h3>
+        
+        <div class="filtro-grupo">
+            <label>Buscar:</label>
+            <input type="text" id="buscar" placeholder="Buscar por nombre...">
+        </div>
+        
+        <div class="filtro-grupo">
+            <label>Categoría:</label>
+            <select id="categoria">
+                <option value="todas">Todas las categorías</option>
+                <option value="Electrónica">Electrónica</option>
+                <option value="Ropa">Ropa</option>
+                <option value="Alimentos">Alimentos</option>
+                <option value="Hogar">Hogar</option>
+            </select>
+        </div>
+        
+        <div class="filtro-grupo">
+            <label>Stock mínimo:</label>
+            <input type="number" id="stockMinimo" value="0" min="0">
+        </div>
+        
+        <div class="filtro-grupo">
+            <label>Ordenar por:</label>
+            <select id="ordenar">
+                <option value="nombre_asc">Nombre (A-Z)</option>
+                <option value="nombre_desc">Nombre (Z-A)</option>
+                <option value="precio_asc">Precio (Menor a Mayor)</option>
+                <option value="precio_desc">Precio (Mayor a Menor)</option>
+                <option value="stock_asc">Stock (Menor a Mayor)</option>
+                <option value="stock_desc">Stock (Mayor a Mayor)</option>
+            </select>
+        </div>
+        
+        <button id="aplicarFiltros">Aplicar Filtros</button>
+        <button id="limpiarFiltros" class="btn-limpiar">Limpiar Filtros</button>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Valor Total</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+        </tbody>
+    </table>
+    <footer>
+        <p>&copy; 2023 Gestión de Productos</p>
+    </footer>
+
+    <script>
+        // Datos de productos (cargar desde JSON en producción)
+        const productos = [
+            { id: 1, nombre: "Laptop Dell", categoria: "Electrónica", precio: 45000, stock: 5 },
+            { id: 2, nombre: "Mouse Logitech", categoria: "Electrónica", precio: 1500, stock: 25 },
+            { id: 3, nombre: "Teclado Mecánico", categoria: "Electrónica", precio: 8000, stock: 15 },
+            { id: 4, nombre: "Remera Nike", categoria: "Ropa", precio: 3500, stock: 50 },
+            { id: 5, nombre: "Pantalón Levis", categoria: "Ropa", precio: 12000, stock: 30 },
+            { id: 6, nombre: "Zapatillas Adidas", categoria: "Ropa", precio: 25000, stock: 20 },
+            { id: 7, nombre: "Arroz 1kg", categoria: "Alimentos", precio: 800, stock: 100 },
+            { id: 8, nombre: "Fideos", categoria: "Alimentos", precio: 600, stock: 150 },
+            { id: 9, nombre: "Aceite", categoria: "Alimentos", precio: 1200, stock: 80 },
+            { id: 10, nombre: "Lámpara LED", categoria: "Hogar", precio: 2500, stock: 40 },
+            { id: 11, nombre: "Silla Gamer", categoria: "Hogar", precio: 35000, stock: 8 },
+            { id: 12, nombre: "Monitor 24 pulgadas", categoria: "Electrónica", precio: 55000, stock: 3 }
+        ];
+
+        /**
+         * 1. mostrarProductos(arrayProductos)
+         * Recibe un array de productos y los muestra en la tabla del HTML
+         */
+        function mostrarProductos(arrayProductos) {
+            const cuerpoTabla = document.getElementById('cuerpoTabla');
+            
+            // Limpiar el contenido actual de la tabla
+            cuerpoTabla.innerHTML = '';
+            
+            // Verificar si hay productos
+            if (arrayProductos.length === 0) {
+                cuerpoTabla.innerHTML = '<tr><td colspan="6" class="no-productos">No se encontraron productos con los criterios seleccionados</td></tr>';
+                return;
+            }
+            
+            // Recorrer el array con forEach()
+            arrayProductos.forEach(producto => {
+                // Calcular el valor total de cada producto (precio × stock)
+                const valorTotal = producto.precio * producto.stock;
+                
+                // Crear filas de tabla dinámicamente
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${producto.id}</td>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.categoria}</td>
+                    <td>$${producto.precio.toLocaleString('es-AR')}</td>
+                    <td>${producto.stock}</td>
+                    <td>$${valorTotal.toLocaleString('es-AR')}</td>
+                `;
+                
+                cuerpoTabla.appendChild(fila);
+            });
+            
+            // Actualizar estadísticas
+            actualizarEstadisticas(arrayProductos);
+        }
+
+        /**
+         * 2. aplicarFiltros()
+         * Filtra los productos según los criterios seleccionados
+         */
+        function aplicarFiltros() {
+            // Obtener los valores de los inputs de filtro
+            const busqueda = document.getElementById('buscar').value.toLowerCase();
+            const categoriaSeleccionada = document.getElementById('categoria').value;
+            const stockMinimo = parseInt(document.getElementById('stockMinimo').value) || 0;
+            
+            // Usar filter() para filtrar el array original
+            const productosFiltrados = productos.filter(producto => {
+                // Considerar múltiples condiciones (nombre AND categoría AND stock)
+                const cumpleNombre = producto.nombre.toLowerCase().includes(busqueda);
+                const cumpleCategoria = categoriaSeleccionada === 'todas' || producto.categoria === categoriaSeleccionada;
+                const cumpleStock = producto.stock >= stockMinimo;
+                
+                return cumpleNombre && cumpleCategoria && cumpleStock;
+            });
+            
+            // Llamar a ordenarProductos() con los resultados
+            ordenarProductos(productosFiltrados);
+        }
+
+        /**
+         * 3. ordenarProductos(arrayProductos)
+         * Ordena los productos según el criterio seleccionado
+         */
+        function ordenarProductos(arrayProductos) {
+            const criterioOrden = document.getElementById('ordenar').value;
+            
+            // Crear una copia del array para no modificar el original
+            const productosOrdenados = [...arrayProductos];
+            
+            // Usar sort() con funciones de comparación
+            productosOrdenados.sort((a, b) => {
+                switch(criterioOrden) {
+                    case 'nombre_asc':
+                        return a.nombre.localeCompare(b.nombre);
+                    case 'nombre_desc':
+                        return b.nombre.localeCompare(a.nombre);
+                    case 'precio_asc':
+                        return a.precio - b.precio;
+                    case 'precio_desc':
+                        return b.precio - a.precio;
+                    case 'stock_asc':
+                        return a.stock - b.stock;
+                    case 'stock_desc':
+                        return b.stock - a.stock;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Llamar a mostrarProductos() con los resultados ordenados
+            mostrarProductos(productosOrdenados);
+        }
+
+        /**
+         * 4. actualizarEstadisticas(arrayProductos)
+         * Calcula y muestra las estadísticas
+         */
+        function actualizarEstadisticas(arrayProductos) {
+            // Contar total de productos
+            const totalProductos = productos.length;
+            
+            // Contar productos filtrados
+            const productosFiltrados = arrayProductos.length;
+            
+            // Usar reduce() para calcular el valor total del stock
+            const valorTotal = arrayProductos.reduce((acumulador, producto) => {
+                return acumulador + (producto.precio * producto.stock);
+            }, 0);
+            
+            // Actualizar los elementos HTML correspondientes
+            document.getElementById('totalProductos').textContent = totalProductos;
+            document.getElementById('productosFiltrados').textContent = productosFiltrados;
+            document.getElementById('valorTotal').textContent = valorTotal.toLocaleString('es-AR');
+        }
+
+        /**
+         * 5. limpiarFiltros()
+         * Resetea todos los filtros a sus valores por defecto
+         */
+        function limpiarFiltros() {
+            // Limpiar inputs y selects
+            document.getElementById('buscar').value = '';
+            document.getElementById('categoria').value = 'todas';
+            document.getElementById('stockMinimo').value = '0';
+            document.getElementById('ordenar').value = 'nombre_asc';
+            
+            // Mostrar todos los productos nuevamente
+            ordenarProductos(productos);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar productos al iniciar
+            mostrarProductos(productos);
+            
+            // Botón aplicar filtros
+            document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+            
+            // Botón limpiar filtros
+            document.getElementById('limpiarFiltros').addEventListener('click', limpiarFiltros);
+            
+            // Búsqueda en tiempo real
+            document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+            
+            // Aplicar filtros al cambiar categoría
+            document.getElementById('categoria').addEventListener('change', aplicarFiltros);
+            
+            // Aplicar filtros al cambiar stock mínimo
+            document.getElementById('stockMinimo').addEventListener('input', aplicarFiltros);
+            
+            // Aplicar ordenamiento al cambiar criterio
+            document.getElementById('ordenar').addEventListener('change', aplicarFiltros);
+        });
+    </script>
+</body>
+</html>
