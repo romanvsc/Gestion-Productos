@@ -10,9 +10,13 @@
     --forest-green-800: #003f0e;
     --forest-green-900: #002405;
     --forest-green-950: #001502;
+    --red-violet-900: #3f0030;
     --torch-red-500: #ff1f31;
     --golden-fizz-100: #f8f800;
     --blue-ribbon-400: #667eff;
+    --white-200: #e2e2e2;
+    --white-300: #c9c9c9;
+    --white-400: #adadad;
     
 }
 
@@ -24,11 +28,29 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--forest-green-950);
-    color: var(--forest-green-50);
+    background-color: var(--red-violet-900);
+    background-image: url('images/20248653_6221793.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--red-violet-900);
     padding: 20px;
     max-width: 1400px;
     margin: 0 auto;
+    position: relative;
+}
+
+/* Overlay para mejorar legibilidad del contenido sobre el background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 21, 2, 0.85);
+    z-index: -1;
 }
 
 h2 {
@@ -56,6 +78,7 @@ h3 {
     font-weight: bold;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     border: 2px solid var(--forest-green-600);
+    color: var(--white-200);
 }
 
 .stats span {
@@ -81,7 +104,7 @@ h3 {
 .filtro-grupo label {
     display: block;
     margin-bottom: 5px;
-    color: var(--forest-green-200);
+    color: var(--white-300);
     font-weight: bold;
 }
 
@@ -91,7 +114,7 @@ h3 {
     border-radius: 5px;
     border: 2px solid var(--forest-green-600);
     background-color: var(--forest-green-800);
-    color: var(--forest-green-50);
+    color: var(--white-200);
     font-size: 1em;
     min-width: 200px;
     transition: all 0.3s ease;
@@ -156,7 +179,7 @@ thead {
 th {
     padding: 15px;
     text-align: left;
-    color: var(--forest-green-50);
+    color: var(--white-200);
     font-weight: bold;
     font-size: 1.1em;
     text-transform: uppercase;
@@ -179,13 +202,19 @@ tbody tr:last-child {
 
 td {
     padding: 12px 15px;
-    color: var(--forest-green-100);
+    color: var(--white-300);
 }
 
 td:nth-child(4),
 td:nth-child(6) {
     color: var(--golden-fizz-100);
     font-weight: bold;
+}
+
+/* Columnas específicas con white-400 para crear jerarquía visual */
+td:nth-child(1) {
+    color: var(--white-400);
+    font-weight: normal;
 }
 
 /* Mensaje cuando no hay productos */
