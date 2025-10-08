@@ -242,3 +242,169 @@ Esta versión prepara el terreno para:
 ✅ Responsive design  
 ✅ Búsqueda en tiempo real
 
+# Feature - Version 1.0.1
+
+## 🔧 Refactorización: Código Modular
+
+### 🎯 Objetivo
+Separar el código JavaScript monolítico en módulos independientes para mejorar:
+- **Mantenibilidad**: Cada función en su propio archivo
+- **Escalabilidad**: Fácil agregar nuevas funcionalidades
+- **Legibilidad**: Código organizado y estructurado
+- **Reutilización**: Funciones independientes y portables
+- **Debugging**: Más fácil identificar y corregir errores
+
+### 📁 Nueva Estructura de Archivos
+
+```
+frontend/
+├── productos.html          # HTML principal (sin código JS inline)
+├── styles.css             # Estilos (sin cambios)
+└── js/                    # Nueva carpeta de módulos JavaScript
+    ├── datos.js           # Array de productos
+    ├── actualizarEstadisticas.js
+    ├── mostrarProductos.js
+    ├── ordenarProductos.js
+    ├── aplicarFiltros.js
+    ├── limpiarFiltros.js
+    └── main.js            # Inicialización y event listeners
+```
+
+### 📦 Módulos Implementados
+
+#### 1. **datos.js** (23 líneas)
+**Propósito**: Contiene el array de productos que simula datos de base de datos
+- Define el array `productos` como variable global
+- 12 productos con estructura: `{id, nombre, categoria, precio, stock}`
+- Accesible por todos los demás módulos
+- En producción, este archivo se reemplazará por llamadas a API/Base de datos
+
+```javascript
+const productos = [ /* 12 productos */ ];
+```
+
+#### 2. **actualizarEstadisticas.js** (31 líneas)
+**Propósito**: Calcular y mostrar estadísticas del inventario
+- **Entrada**: Array de productos filtrados
+- **Proceso**: 
+  - Cuenta total de productos originales
+  - Cuenta productos filtrados actuales
+  - Usa `reduce()` para calcular valor total del stock
+- **Salida**: Actualiza 3 elementos del DOM
+- **Métodos usados**: `reduce()`
+
+#### 3. **mostrarProductos.js** (48 líneas)
+**Propósito**: Renderizar productos en la tabla HTML
+- **Entrada**: Array de productos a mostrar
+- **Proceso**:
+  - Limpia contenido previo de la tabla
+  - Valida si hay productos (muestra mensaje si está vacío)
+  - Usa `forEach()` para iterar productos
+  - Crea filas dinámicamente con `createElement()`
+  - Calcula valor total por producto (precio × stock)
+  - Formatea moneda con `toLocaleString('es-AR')`
+- **Salida**: Tabla HTML poblada
+- **Dependencias**: Llama a `actualizarEstadisticas()`
+- **Métodos usados**: `forEach()`
+
+#### 4. **ordenarProductos.js** (45 líneas)
+**Propósito**: Ordenar productos según criterio seleccionado
+- **Entrada**: Array de productos a ordenar
+- **Proceso**:
+  - Obtiene criterio del select (6 opciones)
+  - Crea copia del array con spread operator `[...]`
+  - Usa `sort()` con comparadores personalizados
+  - Switch para manejar 6 casos diferentes
+- **Salida**: Array ordenado
+- **Dependencias**: Llama a `mostrarProductos()`
+- **Métodos usados**: `sort()`, spread operator
+
+**Criterios de ordenamiento**:
+- `nombre_asc/desc`: Alfabético con `localeCompare()`
+- `precio_asc/desc`: Numérico ascendente/descendente
+- `stock_asc/desc`: Numérico ascendente/descendente
+
+#### 5. **aplicarFiltros.js** (30 líneas)
+**Propósito**: Filtrar productos según múltiples criterios
+- **Entrada**: Ninguna (lee valores del DOM)
+- **Proceso**:
+  - Obtiene valores de 3 inputs (buscar, categoría, stock)
+  - Usa `filter()` con función de predicado compleja
+  - Aplica 3 condiciones con operador AND
+  - `toLowerCase()` para búsqueda case-insensitive
+- **Salida**: Array filtrado
+- **Dependencias**: Llama a `ordenarProductos()`
+- **Métodos usados**: `filter()`, `includes()`, `toLowerCase()`
+
+**Condiciones de filtrado**:
+- `cumpleNombre`: Búsqueda parcial en nombre
+- `cumpleCategoria`: Match exacto o "todas"
+- `cumpleStock`: Stock >= valor mínimo
+
+#### 6. **limpiarFiltros.js** (22 líneas)
+**Propósito**: Resetear todos los filtros a valores por defecto
+- **Entrada**: Ninguna
+- **Proceso**:
+  - Limpia campo de búsqueda
+  - Resetea select de categoría a "todas"
+  - Resetea stock mínimo a "0"
+  - Resetea ordenamiento a "nombre_asc"
+- **Salida**: Vista completa de productos
+- **Dependencias**: Llama a `ordenarProductos(productos)`
+
+#### 7. **main.js** (28 líneas)
+**Propósito**: Inicialización y gestión de eventos
+- **Event Listeners** configurados:
+  - `DOMContentLoaded`: Carga inicial de productos
+  - `click` en botón "Aplicar Filtros"
+  - `click` en botón "Limpiar Filtros"
+  - `input` en campo búsqueda (tiempo real)
+  - `change` en select categoría
+  - `input` en stock mínimo
+  - `change` en select ordenamiento
+- **Rol**: Punto de entrada de la aplicación
+- **Patrón**: Event-driven architecture
+
+### 🔗 Orden de Carga de Scripts (Crítico)
+
+El orden en `productos.html` es **fundamental** debido a dependencias:
+
+```html
+<!-- 1. Datos primero (usado por todos) -->
+<script src="js/datos.js"></script>
+
+<!-- 2. Estadísticas (usada por mostrarProductos) -->
+<script src="js/actualizarEstadisticas.js"></script>
+
+<!-- 3. Mostrar (usada por ordenarProductos) -->
+<script src="js/mostrarProductos.js"></script>
+
+<!-- 4. Ordenar (usada por aplicarFiltros y limpiarFiltros) -->
+<script src="js/ordenarProductos.js"></script>
+
+<!-- 5. Funciones de filtrado -->
+<script src="js/aplicarFiltros.js"></script>
+<script src="js/limpiarFiltros.js"></script>
+
+<!-- 6. Inicialización (última) -->
+<script src="js/main.js"></script>
+```
+
+### 📊 Diagrama de Dependencias
+
+```
+datos.js (productos[])
+    ↓
+actualizarEstadisticas.js
+    ↓
+mostrarProductos.js ────┐
+    ↓                   │
+ordenarProductos.js ←───┘
+    ↓           ↓
+aplicarFiltros  limpiarFiltros
+    ↓           ↓
+    main.js (Event Listeners)
+```
+
+
+
