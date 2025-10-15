@@ -25,7 +25,6 @@ function mostrarProductos(arrayProductos) {
     
     // Recorrer el array con forEach()
     arrayProductos.forEach(producto => {
-        // Calcular el valor total de cada producto (precio × stock)
         const valorTotal = producto.precio * producto.stock;
         
         // Crear filas de tabla dinámicamente

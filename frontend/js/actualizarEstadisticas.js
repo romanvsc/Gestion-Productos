@@ -8,14 +8,12 @@
 /**
  * Calcula y muestra las estadísticas del inventario
  * @param {Array} arrayProductos - Array de productos filtrados actualmente
- * @description Cuenta productos, usa reduce() para calcular valor total 
+ * @description Usa reduce() para calcular valor total 
  *              y actualiza los elementos HTML correspondientes
  */
 function actualizarEstadisticas(arrayProductos) {
-    // Contar total de productos (del array original)
     const totalProductos = productos.length;
     
-    // Contar productos filtrados
     const productosFiltrados = arrayProductos.length;
     
     // Usar reduce() para calcular el valor total del stock

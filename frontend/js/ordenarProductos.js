@@ -14,7 +14,6 @@
 function ordenarProductos(arrayProductos) {
     const criterioOrden = document.getElementById('ordenar').value;
     
-    // Crear una copia del array para no modificar el original
     const productosOrdenados = [...arrayProductos];
     
     // Usar sort() con funciones de comparación
@@ -37,6 +36,5 @@ function ordenarProductos(arrayProductos) {
         }
     });
     
-    // Llamar a mostrarProductos() con los resultados ordenados
     mostrarProductos(productosOrdenados);
 }
