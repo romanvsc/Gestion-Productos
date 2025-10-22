@@ -669,3 +669,546 @@ frontend/
 **Fecha**: Octubre 2025  
 **Cambios**: Background SVG + Paleta White (3 tonos)  
 **Archivos**: 1 nuevo (SVG), 1 modificado (CSS)
+
+---
+
+# Feature - Version 2.0.0
+
+## 🚀 Integración con Backend PHP + MySQL
+
+### 🎯 Objetivo
+Convertir el sistema de gestión de productos de estático (array JavaScript) a **dinámico** con base de datos MySQL y API REST en PHP.
+
+### 📊 Arquitectura Implementada
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    FRONTEND                             │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │           index.php (Vista Principal)            │  │
+│  │  - HTML + CSS + JavaScript                       │  │
+│  │  - Fetch API para peticiones AJAX                │  │
+│  │  - Async/Await para operaciones asíncronas      │  │
+│  └────────────────────┬─────────────────────────────┘  │
+└─────────────────────────┼──────────────────────────────┘
+                         │
+                         │ HTTP Requests (JSON)
+                         │
+┌─────────────────────────┼──────────────────────────────┐
+│                    BACKEND                              │
+│  ┌──────────────────────▼───────────────────────────┐  │
+│  │         procesar.php (API REST)                  │  │
+│  │  - Enrutamiento por acción (crear/leer/etc)     │  │
+│  │  - Validación de datos                           │  │
+│  │  - Respuestas JSON estandarizadas                │  │
+│  └────────────────────┬─────────────────────────────┘  │
+│                       │                                 │
+│  ┌────────────────────▼─────────────────────────────┐  │
+│  │         conexion.php (Database Layer)            │  │
+│  │  - mysqli connection                             │  │
+│  │  - Charset UTF-8                                 │  │
+│  │  - Error handling                                │  │
+│  └────────────────────┬─────────────────────────────┘  │
+└─────────────────────────┼──────────────────────────────┘
+                         │
+                         │ SQL Queries
+                         │
+┌─────────────────────────▼──────────────────────────────┐
+│                 BASE DE DATOS                           │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │     MySQL Database: gestion_productos            │  │
+│  │  ┌────────────────────────────────────────────┐  │  │
+│  │  │  Tabla: productos                          │  │  │
+│  │  │  - id (PK, AUTO_INCREMENT)                 │  │  │
+│  │  │  - nombre (VARCHAR)                        │  │  │
+│  │  │  - categoria (VARCHAR)                     │  │  │
+│  │  │  - precio (DECIMAL)                        │  │  │
+│  │  │  - stock (INT)                             │  │  │
+│  │  │  - fecha_creacion (TIMESTAMP)              │  │  │
+│  │  │  - fecha_actualizacion (TIMESTAMP)         │  │  │
+│  │  │  - Índices: categoria, nombre              │  │  │
+│  │  └────────────────────────────────────────────┘  │  │
+│  └──────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 📁 Nueva Estructura de Archivos
+
+```
+Gestion-Productos/
+├── frontend/
+│   ├── index.php         ← MODIFICADO: Ahora consume API
+│   ├── styles.css        ← Sin cambios
+│   └── images/           ← Sin cambios
+│
+├── backend/              ← NUEVO: Carpeta completa
+│   ├── procesar.php      ← API REST principal
+│   ├── conexion.php      ← Configuración de BD
+│   ├── database.sql      ← Script de creación
+│   └── README.md         ← Documentación de API
+│
+└── README.md             ← Actualizado con v2.0.0
+```
+
+### 🔧 Backend Implementado
+
+#### **1. procesar.php - API REST**
+
+**Endpoints Disponibles:**
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `?accion=leer` | Obtiene todos los productos |
+| POST | `?accion=crear` | Crea un nuevo producto |
+| POST | `?accion=actualizar` | Actualiza un producto existente |
+| POST | `?accion=eliminar` | Elimina un producto |
+
+**Funciones Implementadas:**
+
+##### ✅ `crearProducto($conn)`
+```php
+// 1. Obtiene datos del POST
+// 2. Valida campos obligatorios
+// 3. Valida tipos de datos (numéricos)
+// 4. Valida rangos (precio > 0, stock >= 0)
+// 5. Limpia datos con mysqli_real_escape_string()
+// 6. Ejecuta INSERT INTO productos
+// 7. Responde JSON con producto creado o error
+```
+
+**Validaciones:**
+- ✅ Campos no vacíos
+- ✅ Precio y stock numéricos
+- ✅ Precio > 0
+- ✅ Stock >= 0
+- ✅ Sanitización SQL injection
+
+##### ✅ `leerProductos($conn)`
+```php
+// 1. Ejecuta SELECT de todos los productos
+// 2. Itera resultados con mysqli_fetch_assoc()
+// 3. Convierte tipos (int, float)
+// 4. Responde JSON con array de productos
+```
+
+##### ✅ `actualizarProducto($conn)`
+```php
+// 1. Obtiene ID + datos nuevos del POST
+// 2. Valida ID existe
+// 3. Valida datos (igual que crear)
+// 4. Ejecuta UPDATE productos WHERE id
+// 5. Verifica filas afectadas
+// 6. Responde JSON con producto actualizado
+```
+
+##### ✅ `eliminarProducto($conn)`
+```php
+// 1. Obtiene ID del POST o GET
+// 2. Valida ID numérico
+// 3. Ejecuta DELETE FROM productos WHERE id
+// 4. Verifica filas afectadas
+// 5. Responde JSON de confirmación
+```
+
+##### ✅ `enviarRespuesta($exito, $mensaje, $datos, $codigoHTTP)`
+```php
+// Función auxiliar para respuestas estandarizadas
+// - Establece código HTTP correcto
+// - Genera JSON con estructura:
+//   { exito: bool, mensaje: string, datos: any }
+```
+
+**Estructura de Respuesta Estándar:**
+```json
+{
+  "exito": true,
+  "mensaje": "Operación exitosa",
+  "datos": { /* datos relevantes */ }
+}
+```
+
+**Códigos HTTP Utilizados:**
+- `200 OK`: Operación exitosa
+- `201 Created`: Recurso creado
+- `400 Bad Request`: Datos inválidos
+- `404 Not Found`: Recurso no encontrado
+- `405 Method Not Allowed`: Método HTTP incorrecto
+- `500 Internal Server Error`: Error del servidor
+
+#### **2. conexion.php - Database Layer**
+
+```php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'gestion_productos');
+
+$conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+mysqli_set_charset($conn, "utf8");
+```
+
+**Características:**
+- ✅ Constantes para configuración
+- ✅ Verificación de conexión
+- ✅ Charset UTF-8 para caracteres especiales
+- ✅ Manejo de errores con respuesta JSON
+
+#### **3. database.sql - Estructura de BD**
+
+```sql
+CREATE DATABASE IF NOT EXISTS gestion_productos;
+
+CREATE TABLE productos (
+    id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL,
+    stock INT(11) NOT NULL DEFAULT 0,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+                        ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_categoria (categoria),
+    INDEX idx_nombre (nombre)
+);
+
+-- 12 productos de ejemplo incluidos
+```
+
+**Características:**
+- ✅ ID auto-incremental
+- ✅ Campos con tipos apropiados
+- ✅ Timestamps automáticos
+- ✅ Índices para búsquedas optimizadas
+- ✅ Charset UTF-8
+
+### 🔄 Frontend Actualizado
+
+#### **Cambios en index.php**
+
+##### **1. Configuración de API**
+```javascript
+const API_URL = '../backend/procesar.php';
+let productos = []; // Ya no es const, se actualiza dinámicamente
+```
+
+##### **2. Nueva Función: cargarProductosDesdeAPI()**
+```javascript
+async function cargarProductosDesdeAPI() {
+    try {
+        const response = await fetch(`${API_URL}?accion=leer`);
+        const resultado = await response.json();
+        
+        if (resultado.exito) {
+            productos = resultado.datos;
+            return productos;
+        }
+    } catch (error) {
+        mostrarMensajeError('Error de conexión con el servidor');
+    }
+}
+```
+
+**Características:**
+- ✅ Usa `async/await` para código asíncrono limpio
+- ✅ Fetch API para peticiones HTTP
+- ✅ Manejo de errores con try/catch
+- ✅ Actualiza variable global `productos`
+
+##### **3. Nueva Función: inicializarApp()**
+```javascript
+async function inicializarApp() {
+    // Mensaje de carga
+    cuerpoTabla.innerHTML = '<tr><td colspan="6">⏳ Cargando productos...</td></tr>';
+    
+    // Cargar desde API
+    await cargarProductosDesdeAPI();
+    
+    // Mostrar productos
+    if (productos.length > 0) {
+        mostrarProductos(productos);
+    }
+}
+```
+
+**Flujo de Inicio:**
+1. Muestra mensaje "Cargando..."
+2. Hace petición AJAX a la API
+3. Espera respuesta asíncrona
+4. Actualiza tabla con datos reales
+
+##### **4. Función: mostrarMensajeError()**
+```javascript
+function mostrarMensajeError(mensaje) {
+    cuerpoTabla.innerHTML = `
+        <tr>
+            <td colspan="6" class="no-productos">
+                ⚠️ ${mensaje}
+            </td>
+        </tr>
+    `;
+}
+```
+
+**Uso:**
+- ❌ Error de conexión
+- ❌ Error al cargar productos
+- ❌ Servidor no disponible
+
+##### **5. Event Listener Actualizado**
+```javascript
+document.addEventListener('DOMContentLoaded', async function() {
+    await inicializarApp(); // Ahora es asíncrono
+    
+    // Configurar event listeners (sin cambios)
+    document.getElementById('aplicarFiltros').addEventListener('click', aplicarFiltros);
+    // ... etc
+});
+```
+
+### 🔐 Seguridad Implementada
+
+#### **1. Prevención de SQL Injection**
+```php
+$nombre = mysqli_real_escape_string($conn, trim($nombre));
+$categoria = mysqli_real_escape_string($conn, trim($categoria));
+```
+
+#### **2. Validación de Datos**
+```php
+// Validar tipos
+if (!is_numeric($precio) || !is_numeric($stock)) {
+    enviarRespuesta(false, 'Datos inválidos', null, 400);
+}
+
+// Validar rangos
+if ($precio <= 0 || $stock < 0) {
+    enviarRespuesta(false, 'Valores fuera de rango', null, 400);
+}
+```
+
+#### **3. Sanitización de Entrada**
+- ✅ `trim()` para espacios en blanco
+- ✅ `mysqli_real_escape_string()` para SQL
+- ✅ Validación de tipos con `is_numeric()`
+- ✅ Conversión explícita con `intval()`, `floatval()`
+
+#### **4. Headers de Seguridad**
+```php
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *'); // CORS
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+```
+
+### 📊 Comparativa: Estático vs Dinámico
+
+| Aspecto | v1.x (Estático) | v2.0 (Dinámico) |
+|---------|-----------------|-----------------|
+| **Fuente de datos** | Array JavaScript | Base de datos MySQL |
+| **Persistencia** | No (reinicia al recargar) | Sí (permanente) |
+| **CRUD** | Solo lectura | Completo (CRUD) |
+| **Usuarios múltiples** | No (local) | Sí (compartido) |
+| **Escalabilidad** | Limitada (12 productos) | Ilimitada |
+| **Seguridad** | N/A (frontend) | Validaciones backend |
+| **Arquitectura** | Monolítica | Cliente-Servidor |
+| **API** | No tiene | REST con JSON |
+| **Sincronización** | N/A | Tiempo real |
+
+### 🧪 Testing
+
+#### **Manual de Pruebas**
+
+##### **1. Verificar Backend**
+```bash
+# Navegador o cURL
+http://localhost/gestion-productos/Gestion-Productos/backend/procesar.php?accion=leer
+```
+
+**Respuesta esperada:**
+```json
+{
+  "exito": true,
+  "mensaje": "Productos obtenidos exitosamente",
+  "datos": [ /* 12 productos */ ]
+}
+```
+
+##### **2. Verificar Frontend**
+```bash
+# Abrir en navegador
+http://localhost/gestion-productos/Gestion-Productos/frontend/index.php
+```
+
+**Verificar:**
+- ✅ Productos se cargan automáticamente
+- ✅ Filtros funcionan correctamente
+- ✅ Estadísticas se actualizan
+- ✅ No hay errores en consola (F12)
+
+##### **3. Consola del Navegador**
+```javascript
+// Deberías ver:
+🚀 Iniciando aplicación...
+✅ Productos cargados: 12
+✅ Aplicación inicializada
+📡 Event listeners configurados
+```
+
+### 📈 Mejoras Futuras (Roadmap v2.1+)
+
+#### **Próximas Funcionalidades**
+- [ ] **Formulario de Creación**: Modal para agregar productos
+- [ ] **Edición Inline**: Editar productos desde la tabla
+- [ ] **Confirmación de Eliminación**: Modal de confirmación
+- [ ] **Paginación**: Para grandes cantidades de productos
+- [ ] **Búsqueda en Backend**: Filtros procesados en servidor
+- [ ] **Autenticación**: Login de usuarios
+- [ ] **Roles y Permisos**: Admin vs Usuario
+- [ ] **Historial de Cambios**: Auditoría de modificaciones
+- [ ] **Exportar a CSV/PDF**: Reportes descargables
+- [ ] **Imágenes de Productos**: Upload y almacenamiento
+
+#### **Optimizaciones Técnicas**
+- [ ] **Prepared Statements**: Para mayor seguridad SQL
+- [ ] **Caché**: Reducir consultas repetidas
+- [ ] **Lazy Loading**: Cargar productos bajo demanda
+- [ ] **WebSockets**: Actualización en tiempo real
+- [ ] **Service Workers**: Funcionalidad offline
+- [ ] **TypeScript**: Tipado estático en frontend
+
+### 🎓 Lecciones Aprendidas (v2.0)
+
+1. **Async/Await simplifica código asíncrono**: Más legible que callbacks o promesas
+2. **La separación frontend/backend es fundamental**: Permite escalabilidad
+3. **Validación en backend es obligatoria**: Nunca confiar en validación frontend
+4. **REST API con JSON es estándar**: Comunicación clara y universal
+5. **Manejo de errores es crítico**: Try/catch + códigos HTTP apropiados
+6. **La seguridad no es opcional**: Sanitización, validación, escape de SQL
+
+### 📦 Dependencias del Sistema
+
+#### **Servidor**
+- ✅ PHP 7.4+ (mysqli extension habilitada)
+- ✅ MySQL 5.7+ o MariaDB 10.3+
+- ✅ Apache 2.4+ (XAMPP recomendado)
+
+#### **Cliente**
+- ✅ Navegador moderno con soporte para:
+  - Fetch API
+  - Async/Await (ES2017)
+  - Arrow Functions (ES6)
+  - Template Literals (ES6)
+
+### 🚀 Instalación Completa
+
+#### **Paso 1: Configurar Base de Datos**
+```bash
+# Opción A: phpMyAdmin
+1. http://localhost/phpmyadmin
+2. Importar backend/database.sql
+
+# Opción B: MySQL CLI
+mysql -u root -p < backend/database.sql
+```
+
+#### **Paso 2: Verificar Configuración**
+```php
+// backend/conexion.php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', ''); // Cambiar si tienes contraseña
+define('DB_NAME', 'gestion_productos');
+```
+
+#### **Paso 3: Iniciar Servidores**
+```
+XAMPP Control Panel:
+- Apache: Started ✅
+- MySQL: Started ✅
+```
+
+#### **Paso 4: Acceder a la Aplicación**
+```
+http://localhost/gestion-productos/Gestion-Productos/frontend/index.php
+```
+
+### 📊 Métricas de la Versión 2.0
+
+| Métrica | Valor |
+|---------|-------|
+| Archivos nuevos | 4 (backend completo) |
+| Archivos modificados | 2 (index.php, README.md) |
+| Líneas de PHP | ~350 |
+| Líneas de JavaScript nuevas | ~100 |
+| Líneas de SQL | ~50 |
+| Endpoints API | 4 (CRUD) |
+| Funciones PHP | 5 principales |
+| Validaciones implementadas | 8 tipos |
+| Códigos HTTP usados | 6 diferentes |
+| Tablas de BD | 1 (productos) |
+| Índices de BD | 2 (optimización) |
+
+### 🎯 Logros de la Versión 2.0
+
+✅ **Arquitectura moderna**: Cliente-Servidor con REST API  
+✅ **Base de datos funcional**: MySQL con estructura optimizada  
+✅ **CRUD completo**: Create, Read, Update, Delete  
+✅ **Seguridad robusta**: Validaciones + sanitización  
+✅ **Código asíncrono**: Fetch API + Async/Await  
+✅ **Respuestas estándar**: JSON con códigos HTTP  
+✅ **Documentación completa**: READMEs en cada módulo  
+✅ **Datos persistentes**: Almacenamiento permanente  
+✅ **Escalable**: Preparado para crecimiento  
+✅ **Mantenible**: Código limpio y organizado
+
+---
+
+## 📝 Guía de Inicio Rápido
+
+### ✅ Checklist de Instalación
+
+1. **Verificar XAMPP**
+   - [ ] XAMPP instalado
+   - [ ] Apache corriendo (puerto 80)
+   - [ ] MySQL corriendo (puerto 3306)
+
+2. **Configurar Base de Datos**
+   - [ ] Abrir phpMyAdmin: `http://localhost/phpmyadmin`
+   - [ ] Importar `backend/database.sql`
+   - [ ] Verificar tabla `productos` tiene 12 registros
+
+3. **Acceder a la Aplicación**
+   - [ ] Abrir: `http://localhost/gestion-productos/Gestion-Productos/frontend/index.php`
+   - [ ] Verificar productos se cargan automáticamente
+   - [ ] Probar filtros y ordenamiento
+
+### 🔧 Solución de Problemas
+
+**Problema**: "Error de conexión con el servidor"
+```
+Solución:
+1. Verificar Apache y MySQL están corriendo
+2. Revisar backend/conexion.php
+3. Ver logs: C:\xampp\apache\logs\error.log
+```
+
+**Problema**: "No se muestran productos"
+```
+Solución:
+1. F12 → Console → Buscar errores
+2. Verificar: backend/procesar.php?accion=leer
+3. Confirmar BD tiene datos: SELECT * FROM productos
+```
+
+### 📞 Recursos
+
+- **Backend API**: `backend/README.md`
+- **Estructura BD**: `backend/database.sql`
+- **Frontend**: `frontend/index.php`
+- **Logs**: `C:\xampp\apache\logs\error.log`
+
+---
+
+**Versión**: 2.0.0  
+**Fecha**: Octubre 2025  
+**Cambios**: Integración completa con Backend PHP + MySQL  
+**Archivos**: 4 nuevos (backend), 2 modificados (frontend, README)

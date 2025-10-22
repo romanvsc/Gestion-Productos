@@ -1,15 +1,7 @@
 :root {
-    --forest-green-50: #c5ffcb;
-    --forest-green-100: #00fe53;
-    --forest-green-200: #00db46;
-    --forest-green-300: #00bc3b;
-    --forest-green-400: #00a031;
-    --forest-green-500: #008e2a;
-    --forest-green-600: #007522;
-    --forest-green-700: #005b18;
-    --forest-green-800: #003f0e;
-    --forest-green-900: #002405;
-    --forest-green-950: #001502;
+    --harlequin-50: #80ff75;
+    --harlequin-100: #4bbd3f;
+    --harlequin-500: #071e04;
     --red-violet-900: #3f0030;
     --torch-red-500: #ff1f31;
     --golden-fizz-100: #f8f800;
@@ -49,27 +41,151 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 21, 2, 0.85);
+    background-color: rgba(7, 30, 4, 0.85);
     z-index: -1;
 }
 
 h2 {
     text-align: center;
-    color: var(--forest-green-100);
+    color: var(--harlequin-50);
     margin-bottom: 20px;
     font-size: 2.5em;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 h3 {
-    color: var(--forest-green-200);
+    color: var(--harlequin-50);
     margin-bottom: 15px;
     font-size: 1.5em;
 }
 
+/* Mensajes */
+.mensaje {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: center;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mensaje-exito {
+    background-color: var(--harlequin-500);
+    color: var(--harlequin-50);
+    border: 2px solid var(--harlequin-100);
+}
+
+.mensaje-error {
+    background-color: var(--red-violet-900);
+    color: var(--torch-red-500);
+    border: 2px solid var(--torch-red-500);
+}
+
+.mensaje-info {
+    background-color: var(--harlequin-500);
+    color: var(--golden-fizz-100);
+    border: 2px solid var(--golden-fizz-100);
+}
+
+/* Formulario de Productos */
+.formulario-container {
+    background: var(--harlequin-500);
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--harlequin-100);
+}
+
+.form-grupo {
+    margin-bottom: 15px;
+}
+
+.form-grupo label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--white-300);
+    font-weight: bold;
+}
+
+.form-grupo input,
+.form-grupo select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid var(--harlequin-100);
+    background-color: rgba(7, 30, 4, 0.5);
+    color: var(--white-200);
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus {
+    outline: none;
+    border-color: var(--harlequin-50);
+    background-color: rgba(7, 30, 4, 0.7);
+    box-shadow: 0 0 10px rgba(128, 255, 117, 0.3);
+}
+
+.form-acciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-submit {
+    flex: 1;
+    padding: 12px 25px;
+    background-color: var(--harlequin-100);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: var(--harlequin-50);
+    color: var(--harlequin-500);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(75, 189, 63, 0.4);
+}
+
+.btn-cancelar {
+    padding: 12px 25px;
+    background-color: var(--harlequin-500);
+    color: var(--white-200);
+    border: 2px solid var(--harlequin-100);
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar:hover {
+    background-color: rgba(7, 30, 4, 0.8);
+    border-color: var(--harlequin-50);
+    transform: translateY(-2px);
+}
+
 /* Estadísticas */
 .stats {
-    background: linear-gradient(135deg, var(--forest-green-800), var(--forest-green-900));
+    background: linear-gradient(135deg, var(--harlequin-500), rgba(7, 30, 4, 0.9));
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 25px;
@@ -77,7 +193,7 @@ h3 {
     font-size: 1.1em;
     font-weight: bold;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 2px solid var(--forest-green-600);
+    border: 2px solid var(--harlequin-100);
     color: var(--white-200);
 }
 
@@ -88,12 +204,12 @@ h3 {
 
 /* Filtros */
 .filtros {
-    background: var(--forest-green-900);
+    background: var(--harlequin-500);
     padding: 25px;
     border-radius: 10px;
     margin-bottom: 25px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    border: 2px solid var(--forest-green-700);
+    border: 2px solid var(--harlequin-100);
 }
 
 .filtro-grupo {
@@ -112,8 +228,8 @@ h3 {
 .filtro-grupo select {
     padding: 10px;
     border-radius: 5px;
-    border: 2px solid var(--forest-green-600);
-    background-color: var(--forest-green-800);
+    border: 2px solid var(--harlequin-100);
+    background-color: rgba(7, 30, 4, 0.5);
     color: var(--white-200);
     font-size: 1em;
     min-width: 200px;
@@ -123,9 +239,9 @@ h3 {
 .filtro-grupo input:focus,
 .filtro-grupo select:focus {
     outline: none;
-    border-color: var(--forest-green-300);
-    background-color: var(--forest-green-700);
-    box-shadow: 0 0 10px rgba(0, 254, 83, 0.3);
+    border-color: var(--harlequin-50);
+    background-color: rgba(7, 30, 4, 0.7);
+    box-shadow: 0 0 10px rgba(128, 255, 117, 0.3);
 }
 
 /* Botones */
@@ -141,14 +257,15 @@ button {
 }
 
 #aplicarFiltros {
-    background-color: var(--forest-green-500);
+    background-color: var(--harlequin-100);
     color: white;
 }
 
 #aplicarFiltros:hover {
-    background-color: var(--forest-green-400);
+    background-color: var(--harlequin-50);
+    color: var(--harlequin-500);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 142, 42, 0.4);
+    box-shadow: 0 4px 8px rgba(75, 189, 63, 0.4);
 }
 
 .btn-limpiar {
@@ -166,14 +283,14 @@ button {
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--forest-green-900);
+    background-color: var(--harlequin-500);
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 thead {
-    background: linear-gradient(135deg, var(--forest-green-600), var(--forest-green-700));
+    background: linear-gradient(135deg, var(--harlequin-100), rgba(75, 189, 63, 0.8));
 }
 
 th {
@@ -187,12 +304,12 @@ th {
 }
 
 tbody tr {
-    border-bottom: 1px solid var(--forest-green-800);
+    border-bottom: 1px solid rgba(75, 189, 63, 0.3);
     transition: all 0.3s ease;
 }
 
 tbody tr:hover {
-    background-color: var(--forest-green-800);
+    background-color: rgba(75, 189, 63, 0.2);
     transform: scale(1.01);
 }
 
@@ -217,6 +334,40 @@ td:nth-child(1) {
     font-weight: normal;
 }
 
+/* Columna de acciones */
+.acciones {
+    white-space: nowrap;
+}
+
+.btn-editar,
+.btn-eliminar {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s ease;
+    margin: 0 3px;
+}
+
+.btn-editar {
+    background-color: var(--blue-ribbon-400);
+}
+
+.btn-editar:hover {
+    background-color: #5569e6;
+    transform: scale(1.1);
+}
+
+.btn-eliminar {
+    background-color: var(--torch-red-500);
+}
+
+.btn-eliminar:hover {
+    background-color: #e01828;
+    transform: scale(1.1);
+}
+
 /* Mensaje cuando no hay productos */
 .no-productos {
     text-align: center;
@@ -231,8 +382,8 @@ footer {
     text-align: center;
     margin-top: 30px;
     padding: 20px;
-    color: var(--forest-green-300);
-    border-top: 2px solid var(--forest-green-800);
+    color: var(--harlequin-50);
+    border-top: 2px solid var(--harlequin-100);
 }
 
 /* Responsive */
